@@ -61,7 +61,11 @@ def process_todos(questions: List[Question]):
             if not answer or not answer.strip():
                 answer = "nothing"
             
-            answers.append(Answer(question_text, answer, priority))
+            # Skip saving todos with "nothing" answers
+            if answer.lower().strip() != "nothing":
+                answers.append(Answer(question_text, answer, priority))
+            else:
+                print("ℹ️  Empty answer skipped (no todo created)")
             print()
             
         except KeyboardInterrupt:
@@ -69,8 +73,10 @@ def process_todos(questions: List[Question]):
             return
         except Exception as e:
             print(f"Error getting answer: {e}")
+            # Skip creating todo for empty answers
             # Continue with default priority and "nothing" as answer
-            answers.append(Answer(question_text, "nothing", default_priority))
+            # But don't add to the answers list
+            # answers.append(Answer(question_text, "nothing", default_priority))
     
     # Save to markdown file
     save_todos_to_markdown(answers, today, output_file)
@@ -179,7 +185,8 @@ def list_open_todos(todos: List[Todo]) -> List[Todo]:
     Returns:
         List[Todo]: List of open TODO objects
     """
-    return [todo for todo in todos if not todo.completed]
+    # Filter out completed todos AND todos with empty answers ("nothing")
+    return [todo for todo in todos if not todo.completed and todo.answer.lower() != "nothing"]
 
 def mark_todo_completed(todos: List[Todo], index: int) -> List[Todo]:
     """

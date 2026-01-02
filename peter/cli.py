@@ -52,13 +52,16 @@ def list():
         todos = parse_todos_from_markdown("peter.md")
         open_todos = list_open_todos(todos)
         
-        if not open_todos:
+        # Filter out todos with empty answers ("nothing")
+        filtered_todos = [todo for todo in open_todos if todo.answer.lower() != "nothing"]
+        
+        if not filtered_todos:
             print("✅ No open TODOs found.")
             return 0
         
         print("\n📋 Open TODOs:")
         print("=" * 50)
-        for i, todo in enumerate(open_todos, 1):
+        for i, todo in enumerate(filtered_todos, 1):
             print(f"{i}. {todo.question}")
             print(f"   Answer: {todo.answer}")
             print(f"   Priority: {todo.priority}")
@@ -76,13 +79,16 @@ def status():
     try:
         todos = parse_todos_from_markdown("peter.md")
         
-        if not todos:
+        # Filter out todos with empty answers ("nothing") from display
+        filtered_todos = [todo for todo in todos if todo.answer.lower() != "nothing"]
+        
+        if not filtered_todos:
             print("📝 No TODOs found.")
             return 0
         
         print("\n📊 All TODOs:")
         print("=" * 50)
-        for i, todo in enumerate(todos, 1):
+        for i, todo in enumerate(filtered_todos, 1):
             status = "✅ Completed" if todo.completed else "⏳ Open"
             print(f"{i}. [{status}] {todo.question}")
             print(f"   Answer: {todo.answer}")
