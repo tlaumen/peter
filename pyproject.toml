@@ -1,7 +1,11 @@
 [project]
 name = "peter"
 version = "0.1.0"
-description = "Add your description here"
+description = "CLI tool for managing daily todos using prompt-toolkit"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "prompt-toolkit>=3.0.0",
+]
+[project.scripts]
+peter = "peter.__main__:main"
