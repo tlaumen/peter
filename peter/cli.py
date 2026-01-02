@@ -117,40 +117,101 @@ def close():
             print("✅ No open TODOs to close.")
             return 0
         
-        # Create selection list using prompt-toolkit checkboxlist for multiselect
-        options = [(todo, f"{todo.question} (Priority: {todo.priority})") for todo in open_todos]
+        # Sort todos by priority (1 highest) and then by date (older first)
+        open_todos.sort(key=lambda x: (x.priority, x.date))
         
-        # Define retro styling: black background with green text
-        style = Style.from_dict({
-            "dialog": "bg:#000000 #00ff00",
-            "dialog frame.label": "bg:#000000 #00ff00",
-            "dialog body": "bg:#000000 #00ff00",
-            "dialog shadow": "bg:#000000",
-        })
+        # Create a simple text-based menu for selecting TODOs
+        print("\n📋 Select TODOs to Close:")
+        print("=" * 50)
         
-        # Use checkboxlist dialog for multiselect with retro styling
-        selected_todos = checkboxlist_dialog(
-            title="Select TODOs to Close",
-            text="Choose TODO items to mark as completed (use SPACE to select/deselect, ENTER to submit):",
-            values=options,
-            style=style
-        ).run()
+        # Display all open todos with numbers
+        for i, todo in enumerate(open_todos, 1):
+            print(f"{i}. {todo.question}")
+            print(f"   Priority: {todo.priority}")
+            print(f"   Date: {todo.date}")
+            print()
         
-        if selected_todos:
-            # Mark all selected todos as completed
-            for selected_todo in selected_todos:
-                # Find index in full todos list
-                full_index = todos.index(selected_todo)
-                mark_todo_completed(todos, full_index)
-            save_todos_to_markdown_with_status(todos, "peter.md")
-            print(f"✅ {len(selected_todos)} TODO(s) marked as completed:")
-            for todo in selected_todos:
-                print(f"   - {todo.question}")
-        else:
-            print("Operation cancelled.")
+        print("Instructions:")
+        print("- Enter numbers separated by spaces to select multiple TODOs")
+        print("- Press Enter to submit your selection")
+        print("- Press Ctrl+C to cancel")
+        print()
+        
+        # Get user selection
+        while True:
+            try:
+                selection_input = input("Enter TODO numbers (space-separated): ").strip()
+                
+                if not selection_input:
+                    print("No selection made. Operation cancelled.")
+                    return 0
+                
+                # Parse the selection
+                selected_indices = []
+                for num_str in selection_input.split():
+                    try:
+                        num = int(num_str)
+                        if 1 <= num <= len(open_todos):
+                            selected_indices.append(num - 1)  # Convert to 0-based index
+                        else:
+                            print(f"⚠️  Invalid number: {num}. Please enter numbers between 1 and {len(open_todos)}")
+                            raise ValueError("Invalid number")
+                    except ValueError:
+                        print(f"⚠️  '{num_str}' is not a valid number. Please try again.")
+                        raise ValueError("Invalid input")
+                
+                if not selected_indices:
+                    print("No valid selections made. Please try again.")
+                    continue
+                
+                # Remove duplicates while preserving order
+                seen = set()
+                unique_indices = []
+                for idx in selected_indices:
+                    if idx not in seen:
+                        seen.add(idx)
+                        unique_indices.append(idx)
+                selected_indices = unique_indices
+                
+                # Get the selected todos
+                selected_todos = [open_todos[i] for i in selected_indices]
+                
+                # Confirm selection
+                print(f"\nSelected TODOs to close:")
+                for i, todo in enumerate(selected_todos, 1):
+                    print(f"  {i}. {todo.question}")
+                
+                confirm = input(f"\nConfirm closing {len(selected_todos)} TODO(s)? (y/n): ").strip().lower()
+                if confirm in ['y', 'yes']:
+                    break
+                elif confirm in ['n', 'no']:
+                    print("Operation cancelled.")
+                    return 0
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
+                    continue
+                    
+            except ValueError:
+                continue
+            except KeyboardInterrupt:
+                print("\nOperation cancelled by user.")
+                return 0
+        
+        # Mark all selected todos as completed
+        for selected_todo in selected_todos:
+            # Find index in full todos list
+            full_index = todos.index(selected_todo)
+            mark_todo_completed(todos, full_index)
+        save_todos_to_markdown_with_status(todos, "peter.md")
+        print(f"✅ {len(selected_todos)} TODO(s) marked as completed:")
+        for todo in selected_todos:
+            print(f"   - {todo.question}")
         
         return 0
         
+    except KeyboardInterrupt:
+        print("\n\nOperation cancelled by user.")
+        raise
     except Exception as e:
         print(f"Error: {e}")
         raise
