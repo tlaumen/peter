@@ -2,13 +2,14 @@
 import os
 import tempfile
 from peter.todo_manager import save_todos_to_markdown, create_sample_config
+from peter.models import Answer
 
 def test_save_todos_to_markdown():
     """Test saving todos to markdown file."""
     # Create sample answers
     answers = [
-        {'question': 'Test question 1', 'answer': 'Test answer 1', 'priority': 3},
-        {'question': 'Test question 2', 'answer': 'Test answer 2', 'priority': 2}
+        Answer('Test question 1', 'Test answer 1', 3),
+        Answer('Test question 2', 'Test answer 2', 2)
     ]
     
     # Test saving to markdown
@@ -49,7 +50,7 @@ def test_save_todos_to_markdown_existing_file():
     try:
         # Create sample answers with priority (since that's what the function expects)
         answers = [
-            {'question': 'New question 1', 'answer': 'New answer 1', 'priority': 3}
+            Answer('New question 1', 'New answer 1', 3)
         ]
         
         save_todos_to_markdown(answers, "2026-01-03", output_file)

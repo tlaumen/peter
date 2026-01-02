@@ -2,8 +2,9 @@
 import os
 import re
 from typing import List, Dict, Any
+from .models import Question
 
-def load_config(config_file: str) -> List[Dict[str, Any]]:
+def load_config(config_file: str) -> List[Question]:
     """
     Load questions with priorities from .peter config file.
     
@@ -11,7 +12,7 @@ def load_config(config_file: str) -> List[Dict[str, Any]]:
         config_file (str): Path to the .peter file
         
     Returns:
-        List[Dict[str, Any]]: List of question dictionaries with priority
+        List[Question]: List of Question objects with priority
     """
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
@@ -40,10 +41,7 @@ def load_config(config_file: str) -> List[Dict[str, Any]]:
                         question_text = re.sub(r'\[priority:\d+\]', '', question_text).strip()
                 
                 if question_text:  # Only add non-empty questions
-                    questions.append({
-                        'question': question_text,
-                        'priority': priority
-                    })
+                    questions.append(Question(question_text, priority))
         
         return questions
         
@@ -74,7 +72,7 @@ def create_default_config(config_file: str):
     
     print(f"Created default config file: {config_file}")
 
-def validate_config(questions: List[Dict[str, Any]]) -> bool:
+def validate_config(questions: List[Question]) -> bool:
     """
     Validate that the config contains valid questions.
     
@@ -87,10 +85,10 @@ def validate_config(questions: List[Dict[str, Any]]) -> bool:
     if not questions:
         return False
     for q in questions:
-        if not isinstance(q, dict) or 'question' not in q or 'priority' not in q:
+        if not isinstance(q, Question):
             return False
-        if not isinstance(q['question'], str) or not q['question'].strip():
+        if not isinstance(q.question, str) or not q.question.strip():
             return False
-        if not isinstance(q['priority'], int) or q['priority'] < 1:
+        if not isinstance(q.priority, int) or q.priority < 1:
             return False
     return True

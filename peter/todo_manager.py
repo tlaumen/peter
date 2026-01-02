@@ -6,13 +6,14 @@ from prompt_toolkit import prompt
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
 from typing import List, Dict, Any
+from .models import Question, Answer
 
-def process_todos(questions: List[Dict[str, Any]]):
+def process_todos(questions: List[Question]):
     """
     Process todos by asking questions and saving responses.
     
     Args:
-        questions (List[Dict[str, Any]]): List of question dictionaries with priority
+        questions (List[Question]): List of Question objects with priority
     """
     # Get current date for filename
     today = datetime.now().strftime("%Y-%m-%d")
@@ -34,11 +35,11 @@ def process_todos(questions: List[Dict[str, Any]]):
     answers = []
     for i, question_data in enumerate(questions, 1):
         try:
-            question = question_data['question']
-            default_priority = question_data['priority']
+            question_text = question_data.question
+            default_priority = question_data.priority
             
             # Show question
-            print(f"Question {i}: {question}")
+            print(f"Question {i}: {question_text}")
             
             # Prompt for priority with default value
             priority_input = prompt(f"Priority (default {default_priority}): ", style=style)
@@ -60,11 +61,7 @@ def process_todos(questions: List[Dict[str, Any]]):
             if not answer or not answer.strip():
                 answer = "nothing"
             
-            answers.append({
-                'question': question,
-                'answer': answer,
-                'priority': priority
-            })
+            answers.append(Answer(question_text, answer, priority))
             print()
             
         except KeyboardInterrupt:
@@ -73,23 +70,19 @@ def process_todos(questions: List[Dict[str, Any]]):
         except Exception as e:
             print(f"Error getting answer: {e}")
             # Continue with default priority and "nothing" as answer
-            answers.append({
-                'question': question,
-                'answer': "nothing",
-                'priority': default_priority
-            })
+            answers.append(Answer(question_text, "nothing", default_priority))
     
     # Save to markdown file
     save_todos_to_markdown(answers, today, output_file)
     
     print(f"✅ Todos saved to {output_file}")
 
-def save_todos_to_markdown(answers: List[Dict[str, Any]], date: str, output_file: str):
+def save_todos_to_markdown(answers: List[Answer], date: str, output_file: str):
     """
     Save todos to markdown file.
     
     Args:
-        answers (List[Dict[str, Any]]): List of question-answer-priority tuples
+        answers (List[Answer]): List of Answer objects
         date (str): Date string
         output_file (str): Output filename
     """
@@ -109,9 +102,9 @@ def save_todos_to_markdown(answers: List[Dict[str, Any]], date: str, output_file
     
     # Add questions, answers, and priorities
     for item in answers:
-        content.append(f"- **Question**: {item['question']}")
-        content.append(f"  - **Answer**: {item['answer']}")
-        content.append(f"  - **Priority**: {item['priority']}")
+        content.append(f"- **Question**: {item.question}")
+        content.append(f"  - **Answer**: {item.answer}")
+        content.append(f"  - **Priority**: {item.priority}")
         content.append("")
     
     # Write to file

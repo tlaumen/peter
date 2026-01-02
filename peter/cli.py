@@ -7,6 +7,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
 from .config import load_config, create_default_config
 from .todo_manager import process_todos
+from .models import Question
 
 def main():
     """Main entry point for the peter CLI tool."""

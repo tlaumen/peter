@@ -3,6 +3,7 @@ import os
 import tempfile
 import pytest
 from peter.config import load_config, create_default_config, validate_config
+from peter.models import Question
 
 def test_load_config():
     """Test loading questions from .peter file."""
@@ -19,10 +20,10 @@ def test_load_config():
     try:
         questions = load_config(config_file)
         assert len(questions) == 3
-        assert questions[0]['question'] == "Test question 1"
-        assert questions[1]['question'] == "Test question 2"
-        assert questions[2]['question'] == "Test question 3"
-        assert questions[0]['priority'] == 3  # Default priority
+        assert questions[0].question == "Test question 1"
+        assert questions[1].question == "Test question 2"
+        assert questions[2].question == "Test question 3"
+        assert questions[0].priority == 3  # Default priority
         print("✅ Config loading test passed")
     finally:
         os.unlink(config_file)
@@ -41,9 +42,9 @@ def test_load_config_with_stars():
     try:
         questions = load_config(config_file)
         assert len(questions) == 2
-        assert questions[0]['question'] == "Star question 1"
-        assert questions[1]['question'] == "Star question 2"
-        assert questions[0]['priority'] == 3  # Default priority
+        assert questions[0].question == "Star question 1"
+        assert questions[1].question == "Star question 2"
+        assert questions[0].priority == 3  # Default priority
         print("✅ Config with * bullets test passed")
     finally:
         os.unlink(config_file)
@@ -72,8 +73,8 @@ def test_validate_config():
     """Test config validation."""
     # Valid config
     valid_questions = [
-        {"question": "Question 1", "priority": 3},
-        {"question": "Question 2", "priority": 2}
+        Question("Question 1", 3),
+        Question("Question 2", 2)
     ]
     assert validate_config(valid_questions) == True
     
@@ -82,22 +83,22 @@ def test_validate_config():
     
     # Config with invalid structure
     invalid_questions = [
-        {"question": "Question 1", "priority": 3},
+        Question("Question 1", 3),
         "invalid_item"
     ]
     assert validate_config(invalid_questions) == False
     
     # Config with empty question
     invalid_questions = [
-        {"question": "Question 1", "priority": 3},
-        {"question": "", "priority": 2}
+        Question("Question 1", 3),
+        Question("", 2)
     ]
     assert validate_config(invalid_questions) == False
     
     # Config with invalid priority
     invalid_questions = [
-        {"question": "Question 1", "priority": 3},
-        {"question": "Question 2", "priority": 0}
+        Question("Question 1", 3),
+        Question("Question 2", 0)
     ]
     assert validate_config(invalid_questions) == False
     
