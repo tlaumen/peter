@@ -171,7 +171,7 @@ def parse_todos_from_markdown(file_path: str) -> List[Todo]:
             
             # Look for answer and priority in following lines
             answer = "nothing"
-            priority = 3
+            priority = 999 # default
             completed = False
             
             # Check next lines for answer and priority
@@ -179,12 +179,9 @@ def parse_todos_from_markdown(file_path: str) -> List[Todo]:
             while j < len(lines) and not lines[j].startswith("- **Question**:") and not lines[j].startswith("## "):
                 content_line = lines[j].strip()
                 if content_line.startswith("- **Answer**:"):
-                    answer = content_line[11:].strip()  # Remove "- **Answer**: "
+                    answer = content_line[12:].strip()  # Remove "- **Answer**: "
                 elif content_line.startswith("- **Priority**:"):
-                    try:
-                        priority = int(content_line[13:].strip())  # Remove "- **Priority**: "
-                    except ValueError:
-                        pass
+                    priority = int(content_line[15:].strip())  # Remove "- **Priority**: "
                 elif content_line.startswith("- **Completed**:"):
                     completed = content_line[14:].strip().lower() == "true"
                 j += 1
