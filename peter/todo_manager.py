@@ -73,12 +73,12 @@ def process_todos(questions: List[Question]):
                 
                 # Ask if user wants to add another answer
                 if answer_number > 1:
-                    add_more = prompt("Add another answer? (y/n, default y): ", style=style)
+                    add_more = prompt("Add another answer? (y/n, default n): ", style=style)
                 else:
-                    add_more = prompt("Add another answer? (y/n, default y): ", style=style)
+                    add_more = prompt("Add another answer? (y/n, default n): ", style=style)
                 
                 # Default to yes if empty or invalid input
-                if not add_more or add_more.lower().strip() in ['y', 'yes', '']:
+                if not add_more or add_more.lower().strip() in ['y', 'yes']:
                     answer_number += 1
                     print()
                     continue
