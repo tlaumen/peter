@@ -179,14 +179,12 @@ def parse_todos_from_markdown(file_path: str) -> List[Todo]:
             while j < len(lines) and not lines[j].startswith("- **Question**:") and not lines[j].startswith("## "):
                 content_line = lines[j].strip()
                 if content_line.startswith("- **Answer**:"):
-                    answer = content_line[12:].strip()  # Remove "- **Answer**: "
+                    answer = content_line[15:]  # Remove "- **Answer**: "
                 elif content_line.startswith("- **Priority**:"):
-                    priority = int(content_line[15:].strip())  # Remove "- **Priority**: "
+                    priority = int(content_line[16:])  # Remove "- **Priority**: "
                 elif content_line.startswith("- **Completed**:"):
-                    completed = content_line[16:].strip().lower() == "True"
-                    print(completed)
+                    completed = content_line[17:].strip().lower() == "true"
                 j += 1
-            
             todos.append(Todo(question, answer, priority, completed, current_date))
         
         i += 1
