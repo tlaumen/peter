@@ -84,6 +84,9 @@ def process_todos(questions: List[Question]):
                     continue
                 else:
                     break
+                print("\n")
+                print('-'*50)
+                print("\n")
             
         except KeyboardInterrupt:
             print("\n\nOperation cancelled by user.")
