@@ -6,7 +6,12 @@ import click
 from prompt_toolkit import prompt
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
-from prompt_toolkit.shortcuts import radiolist_dialog
+from prompt_toolkit.shortcuts import radiolist_dialog, checkboxlist_dialog
+from prompt_toolkit.widgets import Dialog, Button, Box, CheckboxList
+from prompt_toolkit.layout import Layout, HSplit, VSplit, FormattedTextControl
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.application import Application
+from prompt_toolkit.formatted_text import FormattedText
 from .config import load_config, create_default_config
 from .todo_manager import process_todos, parse_todos_from_markdown, list_open_todos, mark_todo_completed, save_todos_to_markdown_with_status
 from .models import Question, Todo
@@ -112,22 +117,35 @@ def close():
             print("✅ No open TODOs to close.")
             return 0
         
-        # Create selection list using prompt-toolkit radiolist
+        # Create selection list using prompt-toolkit checkboxlist for multiselect
         options = [(todo, f"{todo.question} (Priority: {todo.priority})") for todo in open_todos]
         
-        # Use radiolist dialog for selection
-        selected_todo = radiolist_dialog(
-            title="Select TODO to Close",
-            text="Choose a TODO item to mark as completed:",
-            values=options
+        # Define retro styling: black background with green text
+        style = Style.from_dict({
+            "dialog": "bg:#000000 #00ff00",
+            "dialog frame.label": "bg:#000000 #00ff00",
+            "dialog body": "bg:#000000 #00ff00",
+            "dialog shadow": "bg:#000000",
+        })
+        
+        # Use checkboxlist dialog for multiselect with retro styling
+        selected_todos = checkboxlist_dialog(
+            title="Select TODOs to Close",
+            text="Choose TODO items to mark as completed (use SPACE to select/deselect, ENTER to submit):",
+            values=options,
+            style=style
         ).run()
         
-        if selected_todo:
-            # Find index in full todos list
-            full_index = todos.index(selected_todo)
-            mark_todo_completed(todos, full_index)
+        if selected_todos:
+            # Mark all selected todos as completed
+            for selected_todo in selected_todos:
+                # Find index in full todos list
+                full_index = todos.index(selected_todo)
+                mark_todo_completed(todos, full_index)
             save_todos_to_markdown_with_status(todos, "peter.md")
-            print(f"✅ TODO '{selected_todo.question}' marked as completed.")
+            print(f"✅ {len(selected_todos)} TODO(s) marked as completed:")
+            for todo in selected_todos:
+                print(f"   - {todo.question}")
         else:
             print("Operation cancelled.")
         
