@@ -54,19 +54,36 @@ def process_todos(questions: List[Question]):
                     print(f"Invalid priority '{priority_input}', using default {default_priority}")
                     priority = default_priority
             
-            # Get user answer
-            answer = prompt("Answer: ", style=style)
-            
-            # Handle empty input
-            if not answer or not answer.strip():
-                answer = "nothing"
-            
-            # Skip saving todos with "nothing" answers
-            if answer.lower().strip() != "nothing":
-                answers.append(Answer(question_text, answer, priority))
-            else:
-                print("ℹ️  Empty answer skipped (no todo created)")
-            print()
+            # Collect all answers for this question
+            answer_number = 1
+            while True:
+                # Get user answer
+                answer = prompt(f"Answer {answer_number}: ", style=style)
+                
+                # Handle empty input
+                if not answer or not answer.strip():
+                    answer = "nothing"
+                
+                # Skip saving todos with "nothing" answers
+                if answer.lower().strip() != "nothing":
+                    answers.append(Answer(question_text, answer, priority))
+                    print(f"✅ Answer {answer_number} saved")
+                else:
+                    print("ℹ️  Empty answer skipped (no todo created)")
+                
+                # Ask if user wants to add another answer
+                if answer_number > 1:
+                    add_more = prompt("Add another answer? (y/n, default y): ", style=style)
+                else:
+                    add_more = prompt("Add another answer? (y/n, default y): ", style=style)
+                
+                # Default to yes if empty or invalid input
+                if not add_more or add_more.lower().strip() in ['y', 'yes', '']:
+                    answer_number += 1
+                    print()
+                    continue
+                else:
+                    break
             
         except KeyboardInterrupt:
             print("\n\nOperation cancelled by user.")
