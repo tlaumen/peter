@@ -183,7 +183,8 @@ def parse_todos_from_markdown(file_path: str) -> List[Todo]:
                 elif content_line.startswith("- **Priority**:"):
                     priority = int(content_line[15:].strip())  # Remove "- **Priority**: "
                 elif content_line.startswith("- **Completed**:"):
-                    completed = content_line[14:].strip().lower() == "True"
+                    completed = content_line[16:].strip().lower() == "True"
+                    print(completed)
                 j += 1
             
             todos.append(Todo(question, answer, priority, completed, current_date))
