@@ -16,3 +16,13 @@ class Answer:
     question: str
     answer: str
     priority: int
+    completed: bool = False
+
+@dataclass
+class Todo:
+    """Data class representing a TODO item with completion status."""
+    question: str
+    answer: str
+    priority: int
+    completed: bool = False
+    date: str = ""

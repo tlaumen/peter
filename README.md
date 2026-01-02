@@ -9,6 +9,7 @@ A simple CLI tool for managing daily todos using prompt-toolkit.
 - Daily todo management with markdown output
 - Automatic handling of empty responses
 - Priority management for todos
+- Open/Closed TODO tracking and management
 
 ## Installation
 
@@ -48,6 +49,13 @@ python -m peter
 
 4. Your answers will be saved to `peter.md` in markdown format with priority information.
 
+## TODO Management Commands
+
+- `peter list` - List all open TODOs
+- `peter status` - Show status of all TODOs
+- `peter close` - Close a TODO item interactively
+- `peter run` - Run the normal todo manager (default behavior)
+
 ## Files
 
 - `.peter` - Configuration file with your daily questions (created automatically)
@@ -63,13 +71,16 @@ python -m peter
 - **Question**: What are your top 3 priorities for today?
   - **Answer**: Complete project proposal, review team feedback, prepare presentation
   - **Priority**: 3
+  - **Completed**: false
 
 - **Question**: What did you accomplish today?
   - **Answer**: nothing
   - **Priority**: 1
+  - **Completed**: false
 ```
 
 ## Requirements
 
 - Python 3.11+
 - prompt-toolkit
+- click

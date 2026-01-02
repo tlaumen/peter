@@ -6,7 +6,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.styles import Style
 from typing import List, Dict, Any
-from .models import Question, Answer
+from .models import Question, Answer, Todo
 
 def process_todos(questions: List[Question]):
     """
@@ -112,6 +112,120 @@ def save_todos_to_markdown(answers: List[Answer], date: str, output_file: str):
         f.write('\n'.join(content))
     
     print(f"📝 Saved {len(answers)} todos for {date}")
+
+def parse_todos_from_markdown(file_path: str) -> List[Todo]:
+    """
+    Parse TODO entries from markdown file.
+    
+    Args:
+        file_path (str): Path to the markdown file
+        
+    Returns:
+        List[Todo]: List of Todo objects with their status
+    """
+    if not os.path.exists(file_path):
+        return []
+    
+    todos = []
+    current_date = ""
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        # Check for date section
+        if line.startswith("## "):
+            current_date = line[3:].strip()
+        elif line.startswith("- **Question**:"):
+            # Parse a TODO entry
+            question = line[15:].strip()  # Remove "- **Question**: "
+            
+            # Look for answer and priority in following lines
+            answer = "nothing"
+            priority = 3
+            completed = False
+            
+            # Check next lines for answer and priority
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("- **Question**:") and not lines[j].startswith("## "):
+                content_line = lines[j].strip()
+                if content_line.startswith("- **Answer**:"):
+                    answer = content_line[11:].strip()  # Remove "- **Answer**: "
+                elif content_line.startswith("- **Priority**:"):
+                    try:
+                        priority = int(content_line[13:].strip())  # Remove "- **Priority**: "
+                    except ValueError:
+                        pass
+                elif content_line.startswith("- **Completed**:"):
+                    completed = content_line[14:].strip().lower() == "true"
+                j += 1
+            
+            todos.append(Todo(question, answer, priority, completed, current_date))
+        
+        i += 1
+    
+    return todos
+
+def list_open_todos(todos: List[Todo]) -> List[Todo]:
+    """
+    Filter and return only open (incomplete) TODOs.
+    
+    Args:
+        todos (List[Todo]): List of all TODO objects
+        
+    Returns:
+        List[Todo]: List of open TODO objects
+    """
+    return [todo for todo in todos if not todo.completed]
+
+def mark_todo_completed(todos: List[Todo], index: int) -> List[Todo]:
+    """
+    Mark a specific TODO as completed.
+    
+    Args:
+        todos (List[Todo]): List of all TODO objects
+        index (int): Index of the TODO to mark as completed
+        
+    Returns:
+        List[Todo]: Updated list of TODO objects
+    """
+    if 0 <= index < len(todos):
+        todos[index].completed = True
+    return todos
+
+def save_todos_to_markdown_with_status(todos: List[Todo], output_file: str):
+    """
+    Save todos to markdown file with completion status.
+    
+    Args:
+        todos (List[Todo]): List of Todo objects
+        output_file (str): Output filename
+    """
+    # Group todos by date
+    dated_todos = {}
+    for todo in todos:
+        date = todo.date
+        if date not in dated_todos:
+            dated_todos[date] = []
+        dated_todos[date].append(todo)
+    
+    # Write to file
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write("# Daily Todos\n\n")
+        
+        # Write each date section
+        for date in sorted(dated_todos.keys()):
+            f.write(f"## {date}\n\n")
+            for todo in dated_todos[date]:
+                f.write(f"- **Question**: {todo.question}\n")
+                f.write(f"  - **Answer**: {todo.answer}\n")
+                f.write(f"  - **Priority**: {todo.priority}\n")
+                f.write(f"  - **Completed**: {todo.completed}\n\n")
+    
+    print(f"📝 Updated todos saved to {output_file}")
 
 def create_sample_config():
     """Create a sample .peter file for testing."""
